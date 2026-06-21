@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
-    //  File validation
+    // Validation
     if (!file || file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files allowed" },
@@ -24,8 +24,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Convert File → Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    // Parse resume
     const result = await parseResume(buffer);
 
     return NextResponse.json({
