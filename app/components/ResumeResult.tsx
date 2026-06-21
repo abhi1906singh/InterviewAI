@@ -1,4 +1,8 @@
-export default function ResumeResult({ data }: any) {
+import { ResumeData} from "../types/resume";
+type ResumeResultProps = {
+  data: ResumeData;
+};
+export default function ResumeResult({ data }: ResumeResultProps) {
   return (
     <div className="mt-6 space-y-6">
 
@@ -8,7 +12,7 @@ export default function ResumeResult({ data }: any) {
       <div>
         <h3 className="font-semibold">Skills</h3>
         <div className="flex flex-wrap gap-2 mt-2">
-          {data.skills.map((skill: string, i: number) => (
+          {data.skills.map((skill, i) => (
             <span key={i} className="bg-gray-200 px-3 py-1 rounded">
               {skill}
             </span>
@@ -19,7 +23,7 @@ export default function ResumeResult({ data }: any) {
       {/* Projects */}
       <div>
         <h3 className="font-semibold">Projects</h3>
-        {data.projects.map((p: any, i: number) => (
+        {data.projects.map((p, i) => (
           <div key={i} className="border p-3 rounded mt-2">
             <h4 className="font-bold">{p.name}</h4>
             <p className="text-sm">{p.description}</p>
@@ -30,7 +34,7 @@ export default function ResumeResult({ data }: any) {
       {/* Experience */}
       <div>
         <h3 className="font-semibold">Experience</h3>
-        {data.experience.map((exp: any, i: number) => (
+        {data.experience.map((exp, i) => (
           <div key={i} className="border p-3 rounded mt-2">
             <h4 className="font-bold">
               {exp.title} - {exp.company}

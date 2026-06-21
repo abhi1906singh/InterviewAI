@@ -1,7 +1,12 @@
 import { Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { ResumeData } from "../types/resume";
 
-export default function UploadBox({setResult}) {
+type UploadBoxProps = {
+  setResult: React.Dispatch<React.SetStateAction<ResumeData | null>>;
+};
+
+export default function UploadBox({ setResult } : UploadBoxProps) {
     
     const fileRef = useRef<HTMLInputElement | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
@@ -36,7 +41,6 @@ export default function UploadBox({setResult}) {
       setError("No file selected");
       return;
       }
-          const start = performance.now();
 
     const formData = new FormData();
     formData.append("file", file);
@@ -54,9 +58,12 @@ export default function UploadBox({setResult}) {
 
     setResult(data.data);
 
-  } catch (err: any) {
-    console.error(err);
-    setError(err.message);
+    } catch (err: unknown) {
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("Something went wrong");
+    }
   } finally {
     setLoading(false);
   }

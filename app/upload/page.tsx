@@ -2,9 +2,10 @@
 import { useState } from "react";
 import UploadBox from "../components/UploadBox";
 import ResumeResult from "../components/ResumeResult";
+import { ResumeData } from "../types/resume";
 
 export default function Upload() {
-  const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<ResumeData | null>(null);
 
   return (
     <div className="flex flex-col gap-5 px-[20%] py-7.5">
