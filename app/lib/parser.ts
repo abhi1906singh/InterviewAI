@@ -1,46 +1,51 @@
+import { extractText } from "unpdf";
 import { GoogleGenAI } from "@google/genai";
-import { PDFParse } from "pdf-parse";
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
-async function parsePDF(buffer: Buffer) {
-  const parser = new PDFParse({
-    data: buffer,
-  });
-
-  const result = await parser.getText();
-
-  return {
-    text: result.text,
-  };
-}
 
 export async function parseResume(buffer: Buffer) {
-  // 1. Extract text
-  const data = await parsePDF(buffer);
+  const uint8Array = new Uint8Array(buffer);
 
-  let text = data.text;
+  const result = await extractText(uint8Array);
 
-  // 2. Clean text
-  text = text
+  // ✅ Normalize text safely
+  const rawText = normalizeText(result);
+
+  const cleanedText = rawText
     .replace(/\n+/g, "\n")
     .replace(/\s+/g, " ")
     .trim();
 
-  // 3. Call Gemini
-  const structured = await structureWithLLM(text);
-
-  return structured;
+  return await structureWithLLM(cleanedText);
 }
+function normalizeText(result: any): string {
+  if (!result) return "";
 
+  // case 1: string
+  if (typeof result === "string") return result;
 
+  // case 2: { text: "..." }
+  if (typeof result.text === "string") return result.text;
+
+  // case 3: { text: ["..."] }
+  if (Array.isArray(result.text)) return result.text.join("\n");
+
+  // case 4: full object fallback
+  if (typeof result === "object") {
+    return JSON.stringify(result);
+  }
+
+  return "";
+}
 
 async function structureWithLLM(text: string) {
   try {
     const prompt = `
-Extract structured resume data.
+You are a resume parsing engine.
 
-Return ONLY valid JSON:
+Extract structured JSON ONLY:
 
 {
   "name": "",
@@ -48,6 +53,11 @@ Return ONLY valid JSON:
   "projects": [],
   "experience": []
 }
+
+Rules:
+- Return ONLY JSON
+- No markdown
+- No explanation
 
 Resume:
 ${text}
@@ -60,16 +70,15 @@ ${text}
 
     let output = response.text || "";
 
-    // 🔥 Clean response (VERY IMPORTANT)
+    // Clean Gemini response
     output = output
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
 
     return JSON.parse(output);
-
   } catch (error) {
-    console.error("Gemini error:", error);
+    console.error("LLM error:", error);
 
     return {
       name: "",
