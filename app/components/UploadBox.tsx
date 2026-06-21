@@ -9,13 +9,18 @@ export default function UploadBox() {
         fileRef?.current?.click()
     }
 
-    function handleFileChange(e:React.ChangeEvent<HTMLInputElement>) {
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
+        if (file) {
         setFileName(file.name)
+        }
     }
 
     function handleCancel() {
         setFileName(null);
+        if (fileRef.current) {
+        fileRef.current.value=""
+        }
     }
     return (
         <div className="flex flex-col gap-4">
@@ -24,12 +29,16 @@ export default function UploadBox() {
             <input type="file" accept=".pdf" className="hidden" ref={fileRef} onChange={handleFileChange}/>
             <Upload />
             </div>
-            {fileName &&(
+            {fileName && (
+                <div className="flex justify-between">
              <div className="flex gap-3">
-                <div>{fileName }</div>
+                <div className="flex items-center">{fileName }</div>
                 <button onClick={handleCancel}><X/></button>
-                </div>
+                    </div>
+                <button className="submit-button" >Upload</button>
+                    </div>
             )}
-            </div>
+        </div>
+        
     )
 }
