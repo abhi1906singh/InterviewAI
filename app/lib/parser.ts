@@ -1,9 +1,5 @@
 import { extractText } from "unpdf";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
+import { ai } from "./gemini";
 
 export async function parseResume(buffer: Buffer) {
   const uint8Array = new Uint8Array(buffer);
