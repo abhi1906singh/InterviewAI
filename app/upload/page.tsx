@@ -29,19 +29,19 @@ export default function Upload() {
       {result && (
   <>
           <ResumeResult data={result} />
-          {questions.length === 0 && (
+          {questions && questions.length === 0 && (
             <QuestionGenerator
       resume={result}
       onQuestionsGenerated={setQuestions}
           />
           )}
-           {questions.length > 0 && (
+           {questions?.length > 0 && (
       <div className="mt-6">
         <h3 className="text-xl font-semibold mb-3">
           Generated Questions
-        </h3>
+              </h3>
 
-        {questions.map((q, i) => (
+        {questions?.map((q, i) => (
           <QuestionCard key={i} question={q} />
         ))}
       </div>

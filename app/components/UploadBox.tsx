@@ -32,8 +32,6 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
 
  async function handleUpload() {
   try {
-    setLoading(true);
-    setError(null);
 
     const file = fileRef.current?.files?.[0];
 
@@ -44,7 +42,7 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
 
     const formData = new FormData();
     formData.append("file", file);
-
+    setLoading(true);
     const res = await fetch("/api/parse-resume", {
       method: "POST",
       body: formData,
@@ -81,7 +79,7 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
                 <div className="flex items-center">{fileName }</div>
                 <button onClick={handleCancel}><X/></button>
                     </div>
-                <button className="submit-button" onClick={handleUpload} >Upload</button>
+            <button className="submit-button" disabled={loading} onClick={handleUpload} >{loading ?"Uploading...":"Upload"}</button>
                     </div>
             )}
         </div>
