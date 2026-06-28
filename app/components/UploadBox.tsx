@@ -4,14 +4,14 @@ import { ResumeData } from "../types/resume";
 
 type UploadBoxProps = {
   setResult: React.Dispatch<React.SetStateAction<ResumeData | null>>;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export default function UploadBox({ setResult } : UploadBoxProps) {
+export default function UploadBox({ setResult,setError } : UploadBoxProps) {
     
     const fileRef = useRef<HTMLInputElement | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     function handleClick() {
         fileRef?.current?.click()
     }
@@ -19,21 +19,23 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
-        setFileName(file.name)
+          setFileName(file.name);
+              setError(null);
         }
     }
 
     function handleCancel() {
-        setFileName(null);
+      setFileName(null);
+      setError(null);
         if (fileRef.current) {
         fileRef.current.value=""
         }
     }
 
  async function handleUpload() {
-  try {
-    setLoading(true);
-    setError(null);
+   try {
+        setError(null);
+    setResult(null);
 
     const file = fileRef.current?.files?.[0];
 
@@ -44,13 +46,13 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
 
     const formData = new FormData();
     formData.append("file", file);
-
+    setLoading(true);
     const res = await fetch("/api/parse-resume", {
       method: "POST",
       body: formData,
     });
 
-    const data = await res.json();
+     const data = await res.json();
 
     if (!res.ok) {
       throw new Error(data.error || "Something went wrong");
@@ -59,7 +61,7 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
     setResult(data.data);
 
     } catch (err: unknown) {
-    if (err instanceof Error) {
+     if (err instanceof Error) {
       setError(err.message);
     } else {
       setError("Something went wrong");
@@ -81,7 +83,7 @@ export default function UploadBox({ setResult } : UploadBoxProps) {
                 <div className="flex items-center">{fileName }</div>
                 <button onClick={handleCancel}><X/></button>
                     </div>
-                <button className="submit-button" onClick={handleUpload} >Upload</button>
+            <button className="submit-button" disabled={loading} onClick={handleUpload} >{loading ?"Uploading...":"Upload"}</button>
                     </div>
             )}
         </div>

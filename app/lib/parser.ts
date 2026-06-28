@@ -37,8 +37,7 @@ function normalizeText(result: any): string {
 }
 
 async function structureWithLLM(text: string) {
-  try {
-    const prompt = `
+  const prompt = `
 You are a resume parsing engine.
 
 Extract structured JSON ONLY:
@@ -59,28 +58,18 @@ Resume:
 ${text}
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite",
-      contents: prompt,
-    });
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-lite",
+    contents: prompt,
+  });
 
-    let output = response.text || "";
+  let output = response.text || "";
 
-    // Clean Gemini response
-    output = output
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+  // Clean Gemini response
+  output = output
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
 
-    return JSON.parse(output);
-  } catch (error) {
-    console.error("LLM error:", error);
-
-    return {
-      name: "",
-      skills: [],
-      projects: [],
-      experience: [],
-    };
-  }
+  return JSON.parse(output);
 }
