@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseResume } from "../../lib/parser";
+import { getErrorStatus } from "@/app/lib/error-handler";
 
 export const runtime = "nodejs";
 
@@ -38,9 +39,39 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Route error:", error);
 
+    const status = getErrorStatus(error);
+
+    let response = {
+      status: 500,
+      error: "Failed to parse resume.",
+    };
+
+    switch (status) {
+      case 401:
+        response = {
+          status: 500,
+          error: "AI service authentication failed.",
+        };
+        break;
+
+      case 429:
+        response = {
+          status: 429,
+          error: "Too many requests. Please try again later.",
+        };
+        break;
+
+      case 503:
+        response = {
+          status: 503,
+          error: "AI service is currently busy. Please try again.",
+        };
+        break;
+    }
+
     return NextResponse.json(
-      { error: "Failed to parse resume" },
-      { status: 500 }
+      { error: response.error },
+      { status: response.status }
     );
   }
 }

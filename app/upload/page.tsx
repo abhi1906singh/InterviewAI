@@ -9,7 +9,8 @@ import QuestionCard from "../components/QuestionCard";
 
 export default function Upload() {
   const [result, setResult] = useState<ResumeData | null>(null);
-  const [questions,setQuestions]=useState<Question[]>([])
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-5 px-[20%] py-7.5">
@@ -23,7 +24,12 @@ export default function Upload() {
       </h4>
 
       {/* ✅ Pass setResult */}
-      <UploadBox setResult={setResult} />
+      <UploadBox setResult={setResult} setError={setError} />
+      {error && (
+  <div className="rounded-md border border-red-300 bg-red-50 p-3 text-red-700">
+    {error}
+  </div>
+)}
 
       {/* ✅ Show result */}
       {result && (
