@@ -6,12 +6,18 @@ import { ResumeData } from "../types/resume";
 import QuestionGenerator from "../components/QuestionGenerator";
 import { Question } from "../types/question";
 import QuestionCard from "../components/QuestionCard";
+import ResumeUploadSuccess from "../components/ResumeUploadSuccess";
+
 
 export default function Upload() {
   const [result, setResult] = useState<ResumeData | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const handleReUpload = () => {
+  setResult(null);
+  setQuestions([]);
+  setError(null);
+};
   return (
     <div className="flex flex-col gap-5 px-[20%] py-7.5">
       
@@ -24,7 +30,9 @@ export default function Upload() {
       </h4>
 
       {/* ✅ Pass setResult */}
-      <UploadBox setResult={setResult} setError={setError} />
+      {!result ? (<UploadBox setResult={setResult} setError={setError} />) :
+       <ResumeUploadSuccess onReUpload={handleReUpload} />
+      }
       {error && (
   <div className="rounded-md border border-red-300 bg-red-50 p-3 text-red-700">
     {error}
