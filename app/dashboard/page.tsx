@@ -7,9 +7,9 @@ export default function Page() {
        router.push('/upload')
     }
     return (
-        <>
-            This is my dashboard page
+        <div>
+           <div> This is my dashboard page</div>
             <button onClick={()=>handleClick()}>Go to resume app</button>
-        </>
+        </div>
     )
 }

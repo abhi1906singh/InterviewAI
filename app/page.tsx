@@ -1,8 +1,12 @@
-  import { redirect } from 'next/navigation';
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
 
-  redirect('/dashboard'); 
-  
-  return null; 
+  if (userId) {
+    redirect("/dashboard");
+  }
+
+  redirect("/sign-in");
 }
