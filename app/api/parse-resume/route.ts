@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { parseResume } from "../../lib/parser";
 import { getErrorStatus } from "@/app/lib/error-handler";
+import { prisma, ensureUser } from "@/app/lib/prisma";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please sign in." },
+        { status: 401 },
+      );
+    }
+
+    // Ensure user exists in database
+    await ensureUser(userId);
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -13,15 +27,15 @@ export async function POST(req: NextRequest) {
     if (!file || file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files allowed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Size validation
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "File too large (max 2MB)" },
-        { status: 400 }
+        { error: "File too large (max 5MB)" },
+        { status: 400 },
       );
     }
 
@@ -31,11 +45,24 @@ export async function POST(req: NextRequest) {
     // Parse resume
     const result = await parseResume(buffer);
 
-    return NextResponse.json({
-      success: true,
-      data: result,
+    // Save to Database
+    const savedResume = await prisma.resume.create({
+      data: {
+        userId,
+        fileName: file.name || "resume.pdf",
+        rawText: result.rawText || "",
+        parsedData: result.structuredData as object,
+      },
     });
 
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...result.structuredData,
+        id: savedResume.id,
+      },
+      resumeId: savedResume.id,
+    });
   } catch (error) {
     console.error("Route error:", error);
 
@@ -71,7 +98,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: response.error },
-      { status: response.status }
+      { status: response.status },
     );
   }
 }

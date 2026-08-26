@@ -8,11 +8,90 @@ datasource db {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String             @id
+  email             String             @unique
+  firstName         String?
+  lastName          String?
+  imageUrl          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  resumes           Resume[]
+  interviewSessions InterviewSession[]
+  answers           AnswerSubmission[]
+}
+
+model Resume {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName          String?
+  rawText           String             @db.Text
+  parsedData        Json
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  interviewSessions InterviewSession[]
+
+  @@index([userId])
+}
+
+enum SessionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model InterviewSession {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId        String?
+  resume          Resume?            @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  role            String
+  difficulty      String
+  status          SessionStatus      @default(IN_PROGRESS)
+  overallScore    Float?
+  feedbackSummary String?            @db.Text
+  questions       Question[]
+  answers         AnswerSubmission[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([resumeId])
+}
+
+model Question {
+  id             String            @id @default(cuid())
+  sessionId      String
+  session        InterviewSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionText   String            @db.Text
+  type           String            @default("conceptual")
+  difficulty     String            @default("medium")
+  order          Int               @default(0)
+  expectedAnswer String?           @db.Text
+  answer         AnswerSubmission?
+  createdAt      DateTime          @default(now())
+
+  @@index([sessionId])
+}
+
+model AnswerSubmission {
+  id           String           @id @default(cuid())
+  questionId   String           @unique
+  question     Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  sessionId    String
+  session      InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answerText   String           @db.Text
+  score        Float?
+  feedback     String?          @db.Text
+  strengths    Json?
+  improvements Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([sessionId])
+  @@index([userId])
 }
