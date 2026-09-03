@@ -2,17 +2,11 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <SignIn
         appearance={{
-          elements: {
-            card: "shadow-xl rounded-2xl",
-            headerTitle: "text-2xl font-bold",
-            headerSubtitle: "text-gray-500",
-            formButtonPrimary:
-              "bg-indigo-600 hover:bg-indigo-700 text-white",
-            footerActionLink:
-              "text-indigo-600 hover:text-indigo-700",
+          variables: {
+            colorPrimary: "#6C47FF",
           },
         }}
       />
