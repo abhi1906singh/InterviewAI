@@ -1,17 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ensureUser } from "@/app/lib/prisma";
+import { Show } from "@clerk/nextjs";
 import { Sparkles, FileText, Bot, Trophy, ArrowRight } from "lucide-react";
 
-export default async function Home() {
-  const { userId } = await auth();
-
-  if (userId) {
-    await ensureUser(userId);
-    redirect("/dashboard");
-  }
-
+export default function Home() {
   return (
     <div className="relative isolate overflow-hidden">
       {/* Hero Section */}
@@ -33,19 +24,37 @@ export default async function Home() {
           </p>
 
           <div className="mt-10 flex items-center gap-x-6">
-            <Link
-              href="/sign-up"
-              className="rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition flex items-center gap-2 cursor-pointer"
-            >
-              Get Started Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/sign-in"
-              className="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600 transition"
-            >
-              Log in <span aria-hidden="true">→</span>
-            </Link>
+            <Show when="signed-out">
+              <Link
+                href="/sign-up"
+                className="rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition flex items-center gap-2 cursor-pointer"
+              >
+                Get Started Free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/sign-in"
+                className="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600 transition"
+              >
+                Log in <span aria-hidden="true">→</span>
+              </Link>
+            </Show>
+
+            <Show when="signed-in">
+              <Link
+                href="/dashboard"
+                className="rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition flex items-center gap-2 cursor-pointer"
+              >
+                Go to Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/upload"
+                className="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600 transition"
+              >
+                Upload Resume <span aria-hidden="true">→</span>
+              </Link>
+            </Show>
           </div>
         </div>
 

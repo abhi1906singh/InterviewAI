@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { useAuth, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Sparkles } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { isSignedIn, isLoaded } = useAuth();
   const isSignInPage = pathname?.startsWith("/sign-in");
   const isSignUpPage = pathname?.startsWith("/sign-up");
 
@@ -19,70 +20,73 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Show when="signed-in">
-            <Link
-              href="/dashboard"
-              className={`text-sm font-medium transition ${
-                pathname === "/dashboard"
-                  ? "text-indigo-600 font-semibold"
-                  : "text-gray-700 hover:text-indigo-600"
-              }`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/upload"
-              className={`text-sm font-medium transition ${
-                pathname === "/upload"
-                  ? "text-indigo-600 font-semibold"
-                  : "text-gray-700 hover:text-indigo-600"
-              }`}
-            >
-              Upload Resume
-            </Link>
-            <Link
-              href="/interview"
-              className={`text-sm font-medium transition ${
-                pathname?.startsWith("/interview")
-                  ? "text-indigo-600 font-semibold"
-                  : "text-gray-700 hover:text-indigo-600"
-              }`}
-            >
-              Interview Room
-            </Link>
-            <div className="ml-2">
-              <UserButton />
-            </div>
-          </Show>
-
-          <Show when="signed-out">
-            {isSignInPage ? (
-              <span className="text-sm font-medium text-gray-400 cursor-not-allowed select-none">
-                Sign In
-              </span>
-            ) : (
-              <SignInButton mode="modal">
-                <button className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition cursor-pointer">
+          {!isLoaded ? (
+            <div className="h-8 w-24 rounded-lg bg-gray-100 animate-pulse" />
+          ) : isSignedIn ? (
+            <>
+              <Link
+                href="/dashboard"
+                className={`text-sm font-medium transition ${
+                  pathname === "/dashboard"
+                    ? "text-indigo-600 font-semibold"
+                    : "text-gray-700 hover:text-indigo-600"
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/upload"
+                className={`text-sm font-medium transition ${
+                  pathname === "/upload"
+                    ? "text-indigo-600 font-semibold"
+                    : "text-gray-700 hover:text-indigo-600"
+                }`}
+              >
+                Upload Resume
+              </Link>
+              <Link
+                href="/interview"
+                className={`text-sm font-medium transition ${
+                  pathname?.startsWith("/interview")
+                    ? "text-indigo-600 font-semibold"
+                    : "text-gray-700 hover:text-indigo-600"
+                }`}
+              >
+                Interview Room
+              </Link>
+              <div className="ml-2">
+                <UserButton />
+              </div>
+            </>
+          ) : (
+            <>
+              {isSignInPage ? (
+                <span className="text-sm font-medium text-gray-400 cursor-not-allowed select-none">
                   Sign In
-                </button>
-              </SignInButton>
-            )}
+                </span>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition cursor-pointer">
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
 
-            {isSignUpPage ? (
-              <span className="rounded-lg bg-indigo-300 px-4 py-2 text-sm font-medium text-white shadow-sm cursor-not-allowed select-none">
-                Get Started
-              </span>
-            ) : (
-              <SignUpButton mode="modal">
-                <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition cursor-pointer">
+              {isSignUpPage ? (
+                <span className="rounded-lg bg-indigo-300 px-4 py-2 text-sm font-medium text-white shadow-sm cursor-not-allowed select-none">
                   Get Started
-                </button>
-              </SignUpButton>
-            )}
-          </Show>
+                </span>
+              ) : (
+                <SignUpButton mode="modal">
+                  <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition cursor-pointer">
+                    Get Started
+                  </button>
+                </SignUpButton>
+              )}
+            </>
+          )}
         </nav>
       </div>
     </header>
   );
 }
-
