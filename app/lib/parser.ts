@@ -1,34 +1,39 @@
 import { extractText } from "unpdf";
 import { ai } from "./gemini";
+import { ResumeData } from "../types/resume";
 
 export async function parseResume(buffer: Buffer) {
   const uint8Array = new Uint8Array(buffer);
 
   const result = await extractText(uint8Array);
 
-  // ✅ Normalize text safely
+  // Normalize text safely
   const rawText = normalizeText(result);
 
-  const cleanedText = rawText
-    .replace(/\n+/g, "\n")
-    .replace(/\s+/g, " ")
-    .trim();
+  const cleanedText = rawText.replace(/\n+/g, "\n").replace(/\s+/g, " ").trim();
 
-  return await structureWithLLM(cleanedText);
+  const structuredData = await structureWithLLM(cleanedText);
+
+  return {
+    rawText: cleanedText,
+    structuredData,
+  };
 }
-function normalizeText(result: any): string {
+
+function normalizeText(result: unknown): string {
   if (!result) return "";
 
   // case 1: string
   if (typeof result === "string") return result;
 
-  // case 2: { text: "..." }
-  if (typeof result.text === "string") return result.text;
+  // case 2: object with text
+  if (typeof result === "object" && result !== null && "text" in result) {
+    const textVal = (result as { text: unknown }).text;
+    if (typeof textVal === "string") return textVal;
+    if (Array.isArray(textVal)) return textVal.join("\n");
+  }
 
-  // case 3: { text: ["..."] }
-  if (Array.isArray(result.text)) return result.text.join("\n");
-
-  // case 4: full object fallback
+  // case 3: full object fallback
   if (typeof result === "object") {
     return JSON.stringify(result);
   }
@@ -36,7 +41,7 @@ function normalizeText(result: any): string {
   return "";
 }
 
-async function structureWithLLM(text: string) {
+async function structureWithLLM(text: string): Promise<ResumeData> {
   const prompt = `
 You are a resume parsing engine.
 
@@ -71,5 +76,5 @@ ${text}
     .replace(/```/g, "")
     .trim();
 
-  return JSON.parse(output);
+  return JSON.parse(output) as ResumeData;
 }
