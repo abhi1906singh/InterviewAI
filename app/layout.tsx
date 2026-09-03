@@ -31,6 +31,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
           appearance={{
             variables: {
               colorPrimary: "#6C47FF",
